@@ -4,13 +4,23 @@
 #include <ESP8266HTTPClient.h>
 
 #include "config.h"
+#include "ferraris_calc.h"
 
 #ifndef FERRARIS_CONFIG
 #define FERRARIS_CONFIG
 
 // CONFIGURATION HERE vvvvvv
 // #define LED_BUILTIN_NODE 16 // LED for signalling
-#define FERRARIS_PIN 13      // IO pin for
+#ifdef WOKWI_SIM
+// Wokwi simuliert nur das ESP-01-Modul (nur GPIO0 und GPIO2 herausgefuehrt).
+// Pin-Umbelegung gilt nur fuer die Simulation, echte Hardware (esp12e) bleibt unveraendert.
+#define FERRARIS_PIN 2
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 0
+#endif
+#else
+#define FERRARIS_PIN 13 // IO pin for
+#endif
 #define FERRARIS_DIVIDER 150 // Number of rotations for a full kWh
 
 #define ON true
@@ -106,7 +116,7 @@ void loop()
         char msg[MSG_BUF_LEN];
         long diff_millis = now - last_millis;
         pinMode(LED_BUILTIN, true);
-        float watts = val_ROTATION_WORTH_Wms / diff_millis;
+        float watts = calculateWatts(val_ROTATION_WORTH_Wms, diff_millis);
         snprintf(msg, MSG_BUF_LEN, "{\"millis\": %ld, \"W\": %f, \"OFF\":%ld, \"ON\":%ld, \"ERR\":%d, \"RC\":%d }", diff_millis, watts, offPhaseDauer, onPhaseDauer, wlan_error_counter, httpResponseCode_lasterror);
         // Serial.println(msg);
 

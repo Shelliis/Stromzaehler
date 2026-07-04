@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "author": "Stromzaehler",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "esp-01", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    {
+      "type": "wokwi-clock-generator",
+      "id": "clk1",
+      "top": -60,
+      "left": 80,
+      "attrs": { "frequency": "1" }
+    }
+  ],
+  "connections": [
+    ["clk1:CLK", "esp:GPIO2", "green", []],
+    ["esp:TX", "$serialMonitor:RX", "", []],
+    ["esp:RX", "$serialMonitor:TX", "", []]
+  ]
+}
