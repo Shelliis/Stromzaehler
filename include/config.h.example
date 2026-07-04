@@ -1,0 +1,5 @@
+#pragma once
+
+// Kopiere diese Datei nach config.h und trage die echten Zugangsdaten ein.
+const char *SSID = "YOUR_WIFI_SSID";
+const char *PSK = "YOUR_WIFI_PASSWORD";
