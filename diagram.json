@@ -3,18 +3,28 @@
   "author": "Stromzaehler",
   "editor": "wokwi",
   "parts": [
-    { "type": "esp-01", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
     {
       "type": "wokwi-clock-generator",
       "id": "clk1",
       "top": -60,
       "left": 80,
-      "attrs": { "frequency": "1" }
+      "attrs": { "frequency": "0.7083" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btnWifiError",
+      "top": 40,
+      "left": 220,
+      "attrs": { "color": "red" }
     }
   ],
   "connections": [
-    ["clk1:CLK", "esp:GPIO2", "green", []],
+    ["clk1:CLK", "esp:4", "green", []],
     ["esp:TX", "$serialMonitor:RX", "", []],
-    ["esp:RX", "$serialMonitor:TX", "", []]
+    ["esp:RX", "$serialMonitor:TX", "", []],
+    ["esp:GND.1", "$serialMonitor:GND", "", []],
+    ["btnWifiError:1.l", "esp:5", "yellow", []],
+    ["btnWifiError:2.l", "esp:GND.2", "black", []]
   ]
 }

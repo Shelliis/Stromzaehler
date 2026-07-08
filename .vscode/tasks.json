@@ -1,0 +1,37 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "PlatformIO: Build esp12e",
+            "type": "shell",
+            "command": "pio run -e esp12e",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "PlatformIO: Build wokwi",
+            "type": "shell",
+            "command": "pio run -e wokwi",
+            "group": "build",
+            "problemMatcher": ["$gcc"]
+        },
+        {
+            "label": "PlatformIO: Upload esp12e (OTA)",
+            "type": "shell",
+            "command": "pio run -e esp12e -t upload",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "PlatformIO: Monitor esp12e",
+            "type": "shell",
+            "command": "pio device monitor -e esp12e -b 9600 --port /dev/ttyUSB0",
+            "group": "test",
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}
