@@ -4,6 +4,9 @@ ESP8266-Firmware, die die rotierende Scheibe eines alten Ferraris-Stromzählers
 optisch abtastet, daraus die aktuelle Leistung (Watt) berechnet und
 per HTTP an einen eigenen Server meldet.
 
+Inspiration/Hintergrund zum grundsätzlichen Aufbau (optische Abtastung der
+Ferraris-Scheibe per ESP8266): [sisyphus.de – Ferraris Transmitter ESP8266](https://www.sisyphus.de/post/2022-08-13-ferraris-transmitter-esp8266/)
+
 ## Hardware
 
 - **Ziel-Hardware:** ESP8266 (esp12e / NodeMCU-kompatibel)
