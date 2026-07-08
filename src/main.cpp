@@ -15,6 +15,12 @@
 // Logmeldungen zentral ein-/ausschalten: 1 = Serial-Ausgabe aktiv, 0 = komplett deaktiviert (No-Op).
 #define ENABLE_LOGGING 0
 
+#ifdef WOKWI_SIM
+// In der Wokwi-Simulation ist Logging unabhaengig von der obigen Einstellung immer aktiv.
+#undef ENABLE_LOGGING
+#define ENABLE_LOGGING 1
+#endif
+
 #if ENABLE_LOGGING
 #define LOG_PRINT(x) Serial.print(x)
 #define LOG_PRINTLN(x) Serial.println(x)
@@ -456,12 +462,14 @@ void loop()
           bufferMessage(reading);
         }
 
+#if ENABLE_LOGGING
         // Neu formatieren, damit ERR/RC den aktuellen Stand zeigen
         char logMsg[MSG_BUF_LEN];
         reading.errCount = wlan_error_counter;
         reading.lastResponseCode = httpResponseCode_lasterror;
         formatReading(logMsg, MSG_BUF_LEN, reading);
         LOG_PRINTLN(logMsg);
+#endif
 
         pinMode(LED_BUILTIN, false);
       }
