@@ -55,6 +55,7 @@
 #define delayMS 25
 
 #define JSON_ENDPOINT "http://192.168.2.211:5000/json2"
+#define HTTP_TIMEOUT_MS 2000 // begrenzt maximale Blockierzeit eines einzelnen POST-Versuchs
 #define PENDING_MSG_BUF_SIZE 200 // max. Anzahl gepufferter, noch nicht gesendeter Nachrichten
 
 #ifdef WOKWI_SIM
@@ -154,6 +155,7 @@ int postMessage(const char *message)
 
   HTTPClient http;
   http.begin(espClient, JSON_ENDPOINT);
+  http.setTimeout(HTTP_TIMEOUT_MS);
   http.addHeader("Content-Type", "application/json");
   http.addHeader("Accept", "application/json");
   int httpResponseCode = http.POST(message);
@@ -186,15 +188,15 @@ void bufferMessage(const PendingReading &reading)
   LOG_PRINTLN(pendingMsgCount);
 }
 
-#define MAX_FLUSH_PER_CALL 25 // begrenzt Blockierzeit von loop(), Rest folgt beim naechsten Aufruf
+#define FLUSH_TIME_BUDGET_MS 2000 // Zeitbudget pro Aufruf, unabhaengig von der Anzahl Nachrichten
 
-// Versucht, gepufferte Messungen der Reihe nach nachzusenden (FIFO); pro Aufruf
-// hoechstens MAX_FLUSH_PER_CALL Stueck, damit loop() bei einem grossen Rueckstau
+// Versucht, gepufferte Messungen der Reihe nach nachzusenden (FIFO); hoechstens
+// FLUSH_TIME_BUDGET_MS insgesamt, damit loop() bei einem grossen Rueckstau
 // nicht zu lange blockiert und echte Impulse verpasst.
 void flushPendingMessages()
 {
-  int sentThisCall = 0;
-  while (pendingMsgCount > 0 && sentThisCall < MAX_FLUSH_PER_CALL && WiFi.status() == WL_CONNECTED)
+  unsigned long flushStart = millis();
+  while (pendingMsgCount > 0 && WiFi.status() == WL_CONNECTED)
   {
     char msg[MSG_BUF_LEN];
     formatReading(msg, MSG_BUF_LEN, pendingReadings[pendingMsgHead]);
@@ -205,18 +207,21 @@ void flushPendingMessages()
       LOG_PRINTLN(msg);
       pendingMsgHead = (pendingMsgHead + 1) % PENDING_MSG_BUF_SIZE;
       pendingMsgCount--;
-      sentThisCall++;
     }
     else if (httpResponseCode == HTTP_DISCARD)
     {
       pendingMsgHead = (pendingMsgHead + 1) % PENDING_MSG_BUF_SIZE;
       pendingMsgCount--;
-      sentThisCall++;
     }
     else
     {
       httpResponseCode_lasterror = httpResponseCode;
       break; // weiterhin Fehler, spaeter erneut versuchen
+    }
+
+    if ((unsigned long)(millis() - flushStart) >= FLUSH_TIME_BUDGET_MS)
+    {
+      break; // Zeitbudget aufgebraucht, Rest folgt beim naechsten Aufruf
     }
   }
 }
@@ -354,7 +359,9 @@ void setup_wifi()
 
 void setup()
 {
+#if ENABLE_LOGGING
   Serial.begin(9600);
+#endif
   LOG_PRINTLN("Starte...");
   setup_wifi();
 
